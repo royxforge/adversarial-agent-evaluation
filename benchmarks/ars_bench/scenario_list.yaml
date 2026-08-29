@@ -1,0 +1,30 @@
+scenarios:
+  # Direct injection (5)
+  - ../scenarios/prompt_injection/basic.yaml
+  - ../scenarios/prompt_injection/role_manipulation.yaml
+  - ../scenarios/prompt_injection/goal_hijacking.yaml
+  - ../scenarios/prompt_injection/delimiter_manipulation.yaml
+  - ../scenarios/prompt_injection/system_override.yaml
+  # Indirect injection (3)
+  - ../scenarios/indirect_injection/rag_poison.yaml
+  - ../scenarios/indirect_injection/web_injection.yaml
+  - ../scenarios/indirect_injection/email_injection.yaml
+  # Tool injection (3)
+  - ../scenarios/tools/tool_output_injection.yaml
+  - ../scenarios/tools/shell_injection.yaml
+  - ../scenarios/tools/api_injection.yaml
+  # Privilege escalation (3)
+  - ../scenarios/privilege/escalation_admin.yaml
+  - ../scenarios/privilege/role_escalation.yaml
+  - ../scenarios/privilege/emergency_override.yaml
+  # Data exfiltration (2)
+  - ../scenarios/exfiltration/canary_extraction.yaml
+  - ../scenarios/exfiltration/secret_leak.yaml
+  # Memory poisoning (2)
+  - ../scenarios/memory/poison_auth.yaml
+  - ../scenarios/memory/policy_override.yaml
+  # Cross-agent (2)
+  - ../scenarios/multi_agent/supervisor_spoofing.yaml
+  - ../scenarios/multi_agent/peer_injection.yaml
+  # RAG (1)
+  - ../scenarios/rag/poison.yaml

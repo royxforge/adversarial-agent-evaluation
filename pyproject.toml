@@ -1,0 +1,31 @@
+[project]
+name = "adversarial-agent-evaluation"
+version = "0.1.0"
+description = "Automated adversarial security testing and evaluation for AI agents"
+authors = []
+requires-python = ">=3.10"
+dependencies = [
+    "pydantic>=2.0.0,<3.0.0",
+    "pydantic-settings>=2.0.0,<3.0.0",
+    "fastapi>=0.100.0,<1.0.0",
+    "uvicorn>=0.23.0,<1.0.0",
+    "pyyaml>=6.0,<7.0",
+    "openai>=1.0.0,<2.0.0",
+    "anthropic>=0.18.0,<1.0.0",
+    "python-dotenv>=1.0.0,<2.0.0",
+    "sqlalchemy>=2.0.0,<3.0.0",
+]
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project.optional-dependencies]
+test = [
+    "pytest>=7.0,<9.0",
+    "pytest-cov>=4.0,<6.0",
+    "httpx>=0.24,<1.0",
+]
+dev = [
+    "ruff>=0.0.292,<1.0",
+    "black>=23.0,<25.0",
+]

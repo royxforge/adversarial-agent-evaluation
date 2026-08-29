@@ -1,0 +1,19 @@
+cff-version: 1.2.0
+title: "Adversarial Agent Evaluation"
+message: "If you use this software, please cite it using the metadata from this file."
+type: software
+authors:
+  - name: "Adversarial Agent Evaluation Contributors"
+repository-code: "https://github.com/royxforge/adversarial-agent-evaluation"
+license: MIT
+date-released: "2026-08-29"
+version: "0.1.0"
+description: "Automated adversarial security testing and evaluation for AI agents"
+keywords:
+  - ai-security
+  - red-teaming
+  - prompt-injection
+  - agent-security
+  - adversarial-testing
+  - llm-security
+  - agent-evaluation

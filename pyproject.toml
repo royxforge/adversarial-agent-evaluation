@@ -19,6 +19,12 @@ dependencies = [
 requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
+[tool.setuptools.packages.find]
+# The import style is `from src.core...`, i.e. `src` itself is the package;
+# discovery must therefore run from the project root, not from inside src/.
+where = ["."]
+include = ["src*"]
+
 [project.optional-dependencies]
 test = [
     "pytest>=7.0,<9.0",

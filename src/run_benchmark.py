@@ -32,17 +32,34 @@ logger = setup_logging()
 
 
 def build_oracle_for_scenario(scenario: Dict[str, Any], policy: SecurityPolicy):
-    """Build appropriate oracle(s) based on scenario configuration."""
-    oracle_checks = scenario.get("oracle", ["unauthorized_file_access"])
+    """Build the oracle(s) for a scenario.
 
+    Returns a single oracle when exactly one check is configured, or a
+    :class:`CompositeOracle` (success if *any* member fires) when the
+    scenario lists several checks. The previous if/elif chain silently
+    dropped every check after the first match.
+    """
+    from src.oracle.composite import CompositeOracle
+
+    oracle_checks = scenario.get("oracle", ["unauthorized_file_access"])
+    if isinstance(oracle_checks, str):
+        oracle_checks = [oracle_checks]
+
+    oracles = []
     if "unauthorized_database_mutation" in oracle_checks:
-        return DatabaseOracle()
-    elif "data_exfiltration" in oracle_checks or "secret_exfiltration" in oracle_checks:
-        return ExfiltrationOracle()
-    elif "privilege_escalation" in oracle_checks:
-        return PrivilegeOracle()
-    else:
+        oracles.append(DatabaseOracle())
+    if "data_exfiltration" in oracle_checks or "secret_exfiltration" in oracle_checks:
+        oracles.append(ExfiltrationOracle())
+    if "privilege_escalation" in oracle_checks:
+        oracles.append(PrivilegeOracle())
+    if "unauthorized_file_access" in oracle_checks:
+        oracles.append(FileSystemOracle(policy))
+
+    if not oracles:
         return FileSystemOracle(policy)
+    if len(oracles) == 1:
+        return oracles[0]
+    return CompositeOracle(oracles)
 
 
 def build_environment_for_scenario(scenario: Dict[str, Any]):
@@ -196,16 +213,29 @@ def main():
     print()
 
     results = []
+    seen_names: set[str] = set()
     for file in scenario_files:
-        # Validate scenario schema
+        # Validate scenario schema. Validation failures fail loudly: running
+        # an unvalidated scenario would silently exercise the wrong policy /
+        # oracle configuration. The validated definition is the source of
+        # truth for the run (previously it was discarded and raw YAML
+        # re-loaded, so schema defaults/typos never took effect).
         try:
             scenario_def = validate_scenario_file(str(file))
         except Exception as e:
-            logger.warning(f"Scenario validation failed for {file.name}: {e}")
+            logger.error(f"Scenario validation failed for {file.name}: {e}")
+            raise
+        if scenario_def.scenario.name in seen_names:
+            # validate_scenario_file also keeps a process-global registry;
+            # guard here as well so a re-run in the same process fails loudly
+            # instead of re-running a stale/duplicate scenario silently.
+            raise ValueError(f"Duplicate scenario name: {scenario_def.scenario.name}")
+        seen_names.add(scenario_def.scenario.name)
 
-        with open(file) as f:
-            scenario = yaml.safe_load(f)
-        name = scenario.get("scenario", {}).get("name", file.stem)
+        scenario = scenario_def.model_dump()
+        # Preserve the original nested YAML shape expected by run_scenario.
+        scenario["scenario"] = {"name": scenario_def.scenario.name, "objective": scenario_def.scenario.objective}
+        name = scenario_def.scenario.name
         print(f"Running scenario: {name}")
 
         result = run_scenario(scenario, provider)

@@ -163,6 +163,13 @@ class CustomAgentAdapter(AgentAdapter):
                 {"tool": "filesystem.write", "arguments": {"path": path}},
                 agent_id=self.agent.model,
             )
+            if not self.policy.check_file_access(path):
+                self.event_logger.log_event(
+                    "security_violation",
+                    {"type": "unauthorized_file_access", "path": path, "severity": "critical"},
+                    agent_id=self.agent.model,
+                )
+                return {"success": False, "path": path, "error": "access_denied"}
             result = self.environment.execute({"operation": "write", "path": path, "content": content})
             return {"success": result.get("success", False), "path": path}
 

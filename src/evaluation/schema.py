@@ -68,23 +68,40 @@ class ScenarioDefinition(BaseModel):
         return cls(**data)
 
 
-# Scenario registry for validation
+# Scenario registry for validation.
+#
+# NOTE: module-global registries make repeated in-process validation fail
+# with "Duplicate scenario" even for legitimate re-runs. Callers that need
+# repeat validation should pass their own registry via validate_scenario's
+# registry parameter (or clear via clear_scenario_registry in tests).
 SCENARIO_REGISTRY: Dict[str, ScenarioDefinition] = {}
 
 
-def validate_scenario(data: Dict[str, Any]) -> ScenarioDefinition:
+def validate_scenario(
+    data: Dict[str, Any],
+    registry: Dict[str, ScenarioDefinition] | None = None,
+) -> ScenarioDefinition:
     """Validate and register a scenario definition."""
     scenario = ScenarioDefinition.from_dict(data)
     name = scenario.scenario.name
-    if name in SCENARIO_REGISTRY:
+    target = SCENARIO_REGISTRY if registry is None else registry
+    if name in target:
         raise ValueError(f"Duplicate scenario name: {name}")
-    SCENARIO_REGISTRY[name] = scenario
+    target[name] = scenario
     return scenario
 
 
-def validate_scenario_file(file_path: str) -> ScenarioDefinition:
+def clear_scenario_registry() -> None:
+    """Clear the global scenario registry (intended for tests)."""
+    SCENARIO_REGISTRY.clear()
+
+
+def validate_scenario_file(
+    file_path: str,
+    registry: Dict[str, ScenarioDefinition] | None = None,
+) -> ScenarioDefinition:
     """Validate a YAML scenario file."""
     import yaml
     with open(file_path) as f:
         data = yaml.safe_load(f)
-    return validate_scenario(data)
+    return validate_scenario(data, registry=registry)

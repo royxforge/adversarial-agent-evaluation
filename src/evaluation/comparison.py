@@ -62,8 +62,16 @@ def run_single_attacker(
     environment: FilesystemEnvironment,
     oracle: FileSystemOracle,
     agent: Agent,
+    on_result=None,
 ) -> ComparisonResult:
-    """Run a single attacker configuration against the target."""
+    """Run a single attacker configuration against the target.
+
+    Args:
+        on_result: Optional callback ``(attack, result, success)`` invoked
+            after each evaluated turn. Lets callers record attacker memory
+            with the *current* turn's outcome; doing it inside the generate
+            function would record the previous turn's result (off-by-one).
+    """
     adapter = CustomAgentAdapter(agent, policy, environment=environment)
     start_time = time.time()
 
@@ -88,6 +96,9 @@ def run_single_attacker(
             "result": result,
             "success": result.get("success", False),
         })
+
+        if on_result is not None:
+            on_result(attack, result, result.get("success", False))
 
         if result.get("success"):
             success = True
@@ -192,14 +203,12 @@ def run_comparison(
                 "target_capabilities": {"tools": ["filesystem.read"]},
                 "history": memory.get_history(),
             })
-            # Record for memory
-            result_dict = history[-1]["result"] if history else {"success": False}
-            memory.record_attack(attack, result_dict, result_dict.get("success", False))
             return attack
 
         result = run_single_attacker(
             "adaptive_redteam", adaptive_generate, objective, max_turns,
             policy, env, oracle, agent,
+            on_result=memory.record_attack,  # current turn's outcome, not the previous one
         )
         report.results.append(result)
     print(f"  ASR: {report.results[-1].asr:.2%}")

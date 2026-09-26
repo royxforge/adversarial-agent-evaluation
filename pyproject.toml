@@ -1,6 +1,6 @@
 [project]
 name = "adversarial-agent-evaluation"
-version = "0.1.0"
+version = "0.2.0""
 description = "Automated adversarial security testing and evaluation for AI agents"
 authors = []
 requires-python = ">=3.10"

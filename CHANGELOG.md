@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-09-26
+
 ### Fixed
 
 - **Oracle trace schema**: database/exfiltration/privilege/filesystem oracles now read nested `EventLogger` payloads (`payload.table`, `payload.destination`, …) with flat-dict backward compatibility, so oracles fire on real benchmark traces instead of only hand-crafted test dicts.

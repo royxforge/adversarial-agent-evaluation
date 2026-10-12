@@ -143,7 +143,7 @@ def run_comparison(
         oracle = FileSystemOracle(policy)
         baseline = StaticPromptBaseline()
 
-        def static_generate(turn, history):
+        def static_generate(turn, history, baseline=baseline):
             return baseline.generate(objective, history)
 
         result = run_single_attacker(
@@ -160,7 +160,7 @@ def run_comparison(
         oracle = FileSystemOracle(policy)
         baseline = RandomMutationBaseline()
 
-        def random_generate(turn, history):
+        def random_generate(turn, history, baseline=baseline):
             return baseline.generate(objective, history)
 
         result = run_single_attacker(
@@ -177,7 +177,7 @@ def run_comparison(
         oracle = FileSystemOracle(policy)
         baseline = SingleShotBaseline(provider)
 
-        def singleshot_generate(turn, history):
+        def singleshot_generate(turn, history, baseline=baseline):
             return baseline.generate(objective, history)
 
         result = run_single_attacker(
@@ -196,7 +196,7 @@ def run_comparison(
         generator = AttackGenerator(provider)
         memory = AttackerMemory()
 
-        def adaptive_generate(turn, history):
+        def adaptive_generate(turn, history, planner=planner, generator=generator, memory=memory):
             plan = planner.plan(objective, {"tools": ["filesystem.read"]}, memory.get_history())
             attack = generator.generate(plan.strategy, {
                 "objective": objective,

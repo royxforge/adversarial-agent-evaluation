@@ -206,7 +206,7 @@ def run_ablation_study(
         oracle = FileSystemOracle(policy)
 
         # Always use direct_injection
-        def static_generate(strategy, obs):
+        def static_generate(strategy, obs, generator=generator):
             return generator.generate("direct_injection", obs)
 
         result = _run_ablation_config(

@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **Packaging metadata**: `pyproject.toml` had a malformed `version = "0.2.0""` line (stray quote); corrected so the file parses (previously `pip`/`pytest` could not read the project config).
+- **Loop-variable closures**: the baseline/adaptive generators in `evaluation/comparison.py` and `evaluation/ablation.py` now bind their loop-scoped collaborators (`baseline`, `planner`, `generator`, `memory`) as default arguments, so each closure captures the instance from its own run rather than relying on late binding.
+
 ## [0.2.0] - 2026-09-26
 
 ### Fixed

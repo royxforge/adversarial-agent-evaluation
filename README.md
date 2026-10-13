@@ -9,7 +9,7 @@
   <img src="https://img.shields.io/badge/Scenarios-21-f59e0b?style=flat-square" />
   <img src="https://img.shields.io/badge/Oracles-4-14b8a6?style=flat-square" />
   <img src="https://img.shields.io/badge/Environments-4-8b5cf6?style=flat-square" />
-  <img src="https://img.shields.io/badge/Tests-249%20passing-brightgreen?style=flat-square" />
+  <img src="https://img.shields.io/badge/Tests-277%20passing-brightgreen?style=flat-square" />
   <img src="https://img.shields.io/badge/License-MIT-6366f1?style=flat-square" />
 </p>
 
@@ -423,6 +423,7 @@ MODEL_PROVIDER=mock python src/run_benchmark.py
 | `python src/cli.py scan --turns 20` | Set attack budget |
 | `python src/cli.py scan --strategies "a,b"` | Limit to specific strategies |
 | `python src/cli.py benchmark` | Run all 21 scenarios |
+| `python src/cli.py benchmark --fail-on-asr 0.25` | Run the benchmark and fail CI above 25% ASR |
 | `python src/run_benchmark.py` | Full benchmark with metadata |
 
 Common options:
@@ -430,6 +431,23 @@ Common options:
 - `--objective "Read /protected/secret.txt"` - attack goal
 - `--turns N` - maximum attack turns (budget)
 - `--strategies "a,b,c"` - comma-separated strategy names
+- `--fail-on-asr F` - exit `1` when the attack success rate exceeds `F` (0-1)
+
+### Attack-success-rate gate
+
+Both benchmark entry points can gate a pipeline on how often the attacks
+succeed, so a change that makes the agent easier to compromise fails CI:
+
+```bash
+MODEL_PROVIDER=mock python src/cli.py benchmark --fail-on-asr 0.25
+
+Attack success rate: 0.00% (0/21 scenarios) - gate: --fail-on-asr 25.00%
+Gate passed: ASR 0.00% <= 25.00%
+```
+
+Exit codes: `0` when ASR is at or below the threshold, `1` when it is above it
+(the offending rate is printed, so the failure is actionable). The gate is
+opt-in, so existing benchmark invocations are unaffected.
 
 ---
 

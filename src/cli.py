@@ -62,7 +62,7 @@ def run_scan(args):
 def run_benchmark_cmd(args):
     """Run benchmark scenarios via CLI."""
     from src.run_benchmark import main as benchmark_main
-    benchmark_main()
+    sys.exit(benchmark_main(fail_on_asr=args.fail_on_asr) or 0)
 
 
 def main():
@@ -76,7 +76,17 @@ def main():
     scan_parser.add_argument("--strategies", default=None, help="Comma-separated strategies to use")
 
     # Benchmark command
-    subparsers.add_parser("benchmark", help="Run benchmark scenarios")
+    bench_parser = subparsers.add_parser("benchmark", help="Run benchmark scenarios")
+    bench_parser.add_argument(
+        "--fail-on-asr",
+        type=float,
+        default=None,
+        metavar="FRACTION",
+        help=(
+            "Exit with status 1 if the attack success rate exceeds this "
+            "fraction (0-1), e.g. --fail-on-asr 0.25 to fail CI above 25%%"
+        ),
+    )
 
     args = parser.parse_args()
     if args.command == "scan":

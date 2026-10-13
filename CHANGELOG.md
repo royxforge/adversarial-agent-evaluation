@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-10-13
+
+### Added
+
+- **Attack-success-rate gate for CI**: `python src/cli.py benchmark` and `python src/run_benchmark.py` accept `--fail-on-asr <fraction>` and exit `1` when the measured attack success rate exceeds it, so a prompt/model/scenario change that makes the agent easier to compromise fails a pipeline instead of only being visible in the printed report. The observed ASR is always reported before the gate is applied (`--fail-on-asr 0.25` fails above 25%), and a run that produced no measurable ASR fails the gate rather than passing it silently.
+
 ### Fixed
 
 - **Packaging metadata**: `pyproject.toml` had a malformed `version = "0.2.0""` line (stray quote); corrected so the file parses (previously `pip`/`pytest` could not read the project config).

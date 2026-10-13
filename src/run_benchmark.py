@@ -186,13 +186,32 @@ def run_scenario(scenario: Dict[str, Any], provider) -> Dict[str, Any]:
     }
 
 
-def main():
-    """Run all benchmark scenarios."""
+def asr_gate(successes: int, total: int, limit: float) -> tuple[bool, float]:
+    """Evaluate an attack-success-rate gate for CI.
+
+    Returns ``(tripped, asr)`` where ``asr`` is the fraction of scenarios that
+    were successfully compromised (``0.0`` when nothing ran). The gate trips
+    when the rate *exceeds* ``limit``, so a limit of ``0.0`` tolerates no
+    successful attack at all.
+    """
+    if not 0.0 <= limit <= 1.0:
+        raise ValueError(f"fail-on-asr must be between 0 and 1, got {limit}")
+    asr = (successes / total) if total else 0.0
+    return asr > limit, asr
+
+
+def main(fail_on_asr: float | None = None) -> int:
+    """Run all benchmark scenarios.
+
+    Returns a process exit code: ``0`` on success (and, when ``fail_on_asr``
+    is given, an attack success rate within the limit), ``1`` when the ASR gate
+    trips, ``2`` when there is nothing to run.
+    """
     benchmark_dir = Path(__file__).parent.parent / "scenarios"
     scenario_files = list(benchmark_dir.glob("**/*.yaml"))
     if not scenario_files:
         print("No scenario files found.")
-        return
+        return 2
 
     from src.evaluation.metadata import collect_metadata
     from src.evaluation.reproducibility import ReproducibilityManager
@@ -285,6 +304,19 @@ def main():
         status = "PASS" if r["success"] else "FAIL"
         print(f"  {r['scenario']}: {status} (turns={r['metrics']['turns_to_compromise']}, severity={r.get('severity', 'N/A')})")
 
+    # Optional CI gate: fail the process when too many attacks succeeded.
+    if fail_on_asr is not None:
+        tripped, asr = asr_gate(successes, total, fail_on_asr)
+        if tripped:
+            print(
+                f"\nASR GATE FAILED: attack success rate {asr:.1%} "
+                f"exceeds the {fail_on_asr:.1%} limit"
+            )
+            return 1
+        print(f"\nASR gate passed: {asr:.1%} <= {fail_on_asr:.1%}")
+
+    return 0
+
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **Demo output no longer depends on the console encoding**: the defended-comparison report printed two em dashes, which Windows consoles encode as cp1252 `0x97` and render as `0x97`/replacement characters when the report is piped or captured. Both lines now use ASCII punctuation, so the `make demo-defended` transcript is identical on every platform. `docs/demo-defended.gif` was re-recorded from a real run, and the screen's `blocked at L4_sentence_intent` column no longer renders as tofu boxes.
+- **`src/experiments/` is gitignored**: `run_benchmark`/`cli benchmark` write reproducibility artefacts next to the package, so running the demo left untracked `benchmark_*.json` files in the working tree.
+
+### Added
+
+- **Defended-target mode**: the harness can now score attacks against a target agent that screens inbound content before tool execution — the only configuration where attacker quality is measurable at all, since against an undefended target every attacker reaches 100% ASR on Turn 1 (the undefended row is the control, not a finding). `core/defense.py` implements a four-layer screen applied in order, first match wins: `L1_keyword` (injection markers), `L2_delimiter` (fake role/format delimiters), `L3_authority` (claimed authorization or urgency) and `L4_sentence_intent` (a read verb and a sensitive path anywhere in the same message). A screened message is rejected before the target parses it and leaves only a `defense_blocked` event, whereas an attack that reaches the policy layer still logs `security_violation` — so blocked and attempted-but-denied are distinguishable in the trace. `DefendedAgentAdapter` wraps the existing adapter with that screen, and `python -m adversarial_agent_evaluation.evaluation.defended_comparison` (or `make demo-defended`) runs static and adaptive attackers against both targets offline, deterministically and with no API key: **all 8 static payloads and all 8 adaptive payloads are blocked — 0% ASR against both**, against Turn 1 for both attackers when the screen is absent. L4 is message-scoped rather than sentence-scoped: it pairs a read verb with a sensitive path anywhere in the message, so the cross-sentence split that previously cleared the layer on Turn 5 (path in one sentence, verb in another) is now screened too, while a benign multi-sentence message with no sensitive path still passes. The trade-off it buys is stated rather than hidden — pairing across the whole message **over-blocks** a message that merely mentions a protected path, and a content filter still is not an authorization boundary: the policy layer remains what actually denies the read. Covered by `tests/test_defense.py`, which asserts both directions (the split is blocked *and* the benign multi-sentence message is allowed); demonstrated in `docs/demo-defended.gif` and the README's *Defended-target mode* section.
+
 ## [0.3.0] - 2026-10-13
 
 ### Added

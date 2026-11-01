@@ -6,27 +6,27 @@ from pathlib import Path
 from typing import Dict, Any, List
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from src.core.agent import Agent, Tool
-from src.core.policy import SecurityPolicy
-from src.core.events import EventLogger
-from src.adapters.custom import CustomAgentAdapter
-from src.attacker.planner import Planner
-from src.attacker.generator import AttackGenerator
-from src.attacker.memory import AttackerMemory
-from src.attacker.strategist import Strategist
-from src.oracle.filesystem import FileSystemOracle
-from src.oracle.database import DatabaseOracle
-from src.oracle.exfiltration import ExfiltrationOracle
-from src.oracle.privilege import PrivilegeOracle
-from src.environments.filesystem import FilesystemEnvironment
-from src.environments.browser import BrowserEnvironment
-from src.environments.database import DatabaseEnvironment
-from src.environments.multi_agent import MultiAgentEnvironment
-from src.evaluation.metrics import Metrics
-from src.evaluation.severity import Severity
-from src.models.factory import get_model_provider
-from src.config import settings
-from src.logging_config import setup_logging
+from adversarial_agent_evaluation.core.agent import Agent, Tool
+from adversarial_agent_evaluation.core.policy import SecurityPolicy
+from adversarial_agent_evaluation.core.events import EventLogger
+from adversarial_agent_evaluation.adapters.custom import CustomAgentAdapter
+from adversarial_agent_evaluation.attacker.planner import Planner
+from adversarial_agent_evaluation.attacker.generator import AttackGenerator
+from adversarial_agent_evaluation.attacker.memory import AttackerMemory
+from adversarial_agent_evaluation.attacker.strategist import Strategist
+from adversarial_agent_evaluation.oracle.filesystem import FileSystemOracle
+from adversarial_agent_evaluation.oracle.database import DatabaseOracle
+from adversarial_agent_evaluation.oracle.exfiltration import ExfiltrationOracle
+from adversarial_agent_evaluation.oracle.privilege import PrivilegeOracle
+from adversarial_agent_evaluation.environments.filesystem import FilesystemEnvironment
+from adversarial_agent_evaluation.environments.browser import BrowserEnvironment
+from adversarial_agent_evaluation.environments.database import DatabaseEnvironment
+from adversarial_agent_evaluation.environments.multi_agent import MultiAgentEnvironment
+from adversarial_agent_evaluation.evaluation.metrics import Metrics
+from adversarial_agent_evaluation.evaluation.severity import Severity
+from adversarial_agent_evaluation.models.factory import get_model_provider
+from adversarial_agent_evaluation.config import settings
+from adversarial_agent_evaluation.logging_config import setup_logging
 
 logger = setup_logging()
 
@@ -39,7 +39,7 @@ def build_oracle_for_scenario(scenario: Dict[str, Any], policy: SecurityPolicy):
     scenario lists several checks. The previous if/elif chain silently
     dropped every check after the first match.
     """
-    from src.oracle.composite import CompositeOracle
+    from adversarial_agent_evaluation.oracle.composite import CompositeOracle
 
     oracle_checks = scenario.get("oracle", ["unauthorized_file_access"])
     if isinstance(oracle_checks, str):
@@ -207,15 +207,27 @@ def main(fail_on_asr: float | None = None) -> int:
     is given, an attack success rate within the limit), ``1`` when the ASR gate
     trips, ``2`` when there is nothing to run.
     """
-    benchmark_dir = Path(__file__).parent.parent / "scenarios"
-    scenario_files = list(benchmark_dir.glob("**/*.yaml"))
-    if not scenario_files:
-        print("No scenario files found.")
+    # Scenarios ship beside the source in a checkout, but sit next to the
+    # installed package in the Docker image. Resolve against every layout we
+    # ship rather than assuming one, so `make demo` works from a fresh clone.
+    candidates = (
+        Path(__file__).parent.parent.parent / "scenarios",  # editable install / repo checkout
+        Path.cwd() / "scenarios",                           # run from the repo root (Docker WORKDIR)
+        Path(__file__).parent.parent / "scenarios",         # legacy layout
+    )
+    benchmark_dir = next(
+        (p for p in candidates if p.is_dir() and any(p.glob("**/*.yaml"))),
+        None,
+    )
+    if benchmark_dir is None:
+        searched = "\n  ".join(str(p) for p in candidates)
+        print(f"No scenario files found. Searched:\n  {searched}")
         return 2
+    scenario_files = sorted(benchmark_dir.glob("**/*.yaml"))
 
-    from src.evaluation.metadata import collect_metadata
-    from src.evaluation.reproducibility import ReproducibilityManager
-    from src.evaluation.schema import validate_scenario_file
+    from adversarial_agent_evaluation.evaluation.metadata import collect_metadata
+    from adversarial_agent_evaluation.evaluation.reproducibility import ReproducibilityManager
+    from adversarial_agent_evaluation.evaluation.schema import validate_scenario_file
 
     provider = get_model_provider()
     print(f"Using model: {provider.get_model_name()}")

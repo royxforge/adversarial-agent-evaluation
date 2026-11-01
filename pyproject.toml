@@ -15,15 +15,19 @@ dependencies = [
     "python-dotenv>=1.0.0,<2.0.0",
     "sqlalchemy>=2.0.0,<3.0.0",
 ]
+
+[project.scripts]
+adversarial-agent-evaluation = "adversarial_agent_evaluation.cli:main"
+
 [build-system]
 requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
-# The import style is `from src.core...`, i.e. `src` itself is the package;
-# discovery must therefore run from the project root, not from inside src/.
-where = ["."]
-include = ["src*"]
+# Standard src layout: the importable package is `adversarial_agent_evaluation`,
+# so installing this project no longer claims the generic top-level name `src`.
+where = ["src"]
+include = ["adversarial_agent_evaluation*"]
 
 [project.optional-dependencies]
 test = [
@@ -35,3 +39,9 @@ dev = [
     "ruff>=0.0.292,<1.0",
     "black>=23.0,<25.0",
 ]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+# Let `pytest` resolve the package from a fresh clone without requiring
+# `pip install -e .` first (the package lives under src/).
+pythonpath = ["src"]

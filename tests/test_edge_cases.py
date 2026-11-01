@@ -6,29 +6,29 @@ scenarios that could cause runtime errors or incorrect behavior.
 import pytest
 from typing import Dict, Any
 
-from src.core.agent import Agent, Tool
-from src.core.policy import SecurityPolicy
-from src.core.events import EventLogger
-from src.adapters.custom import CustomAgentAdapter
-from src.attacker.planner import Planner, AttackPlan, VALID_STRATEGIES
-from src.attacker.generator import AttackGenerator
-from src.attacker.memory import AttackerMemory
-from src.attacker.strategist import Strategist
-from src.attacker.baselines import StaticPromptBaseline, RandomMutationBaseline, SingleShotBaseline
-from src.attacks import ATTACK_STRATEGIES
-from src.oracle.filesystem import FileSystemOracle
-from src.oracle.database import DatabaseOracle
-from src.oracle.exfiltration import ExfiltrationOracle
-from src.oracle.privilege import PrivilegeOracle
-from src.evaluation.metrics import Metrics
-from src.evaluation.severity import Severity, SeverityLevel
-from src.reporting.findings import Finding
-from src.reporting.reports import ReportGenerator
-from src.models.mock_provider import MockProvider
-from src.environments.filesystem import FilesystemEnvironment
-from src.environments.browser import BrowserEnvironment
-from src.environments.database import DatabaseEnvironment
-from src.environments.multi_agent import MultiAgentEnvironment
+from adversarial_agent_evaluation.core.agent import Agent, Tool
+from adversarial_agent_evaluation.core.policy import SecurityPolicy
+from adversarial_agent_evaluation.core.events import EventLogger
+from adversarial_agent_evaluation.adapters.custom import CustomAgentAdapter
+from adversarial_agent_evaluation.attacker.planner import Planner, AttackPlan, VALID_STRATEGIES
+from adversarial_agent_evaluation.attacker.generator import AttackGenerator
+from adversarial_agent_evaluation.attacker.memory import AttackerMemory
+from adversarial_agent_evaluation.attacker.strategist import Strategist
+from adversarial_agent_evaluation.attacker.baselines import StaticPromptBaseline, RandomMutationBaseline, SingleShotBaseline
+from adversarial_agent_evaluation.attacks import ATTACK_STRATEGIES
+from adversarial_agent_evaluation.oracle.filesystem import FileSystemOracle
+from adversarial_agent_evaluation.oracle.database import DatabaseOracle
+from adversarial_agent_evaluation.oracle.exfiltration import ExfiltrationOracle
+from adversarial_agent_evaluation.oracle.privilege import PrivilegeOracle
+from adversarial_agent_evaluation.evaluation.metrics import Metrics
+from adversarial_agent_evaluation.evaluation.severity import Severity, SeverityLevel
+from adversarial_agent_evaluation.reporting.findings import Finding
+from adversarial_agent_evaluation.reporting.reports import ReportGenerator
+from adversarial_agent_evaluation.models.mock_provider import MockProvider
+from adversarial_agent_evaluation.environments.filesystem import FilesystemEnvironment
+from adversarial_agent_evaluation.environments.browser import BrowserEnvironment
+from adversarial_agent_evaluation.environments.database import DatabaseEnvironment
+from adversarial_agent_evaluation.environments.multi_agent import MultiAgentEnvironment
 
 
 # ============================================================
@@ -1059,14 +1059,14 @@ class TestBaselineEdgeCases:
         assert "secret" in attack["content"].lower()
 
     def test_baselines_all_have_get_name(self):
-        from src.attacker.baselines import get_baseline
+        from adversarial_agent_evaluation.attacker.baselines import get_baseline
         for name in ["static", "random", "single_shot"]:
             baseline = get_baseline(name)
             assert hasattr(baseline, "get_name")
             assert isinstance(baseline.get_name(), str)
 
     def test_get_baseline_unknown(self):
-        from src.attacker.baselines import get_baseline
+        from adversarial_agent_evaluation.attacker.baselines import get_baseline
         with pytest.raises(ValueError):
             get_baseline("nonexistent_baseline")
 

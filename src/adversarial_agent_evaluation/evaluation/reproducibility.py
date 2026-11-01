@@ -148,7 +148,7 @@ class ReproducibilityManager:
 ```bash
 pip install -e .
 export OPENAI_API_KEY=<your-key>
-python src/run_benchmark.py
+python -m adversarial_agent_evaluation.run_benchmark
 ```
 """
         return report

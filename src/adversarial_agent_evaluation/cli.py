@@ -3,10 +3,10 @@ import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from src.main import run_red_team
-from src.reporting.findings import Finding
-from src.reporting.reports import ReportGenerator
-from src.evaluation.severity import Severity
+from adversarial_agent_evaluation.main import run_red_team
+from adversarial_agent_evaluation.reporting.findings import Finding
+from adversarial_agent_evaluation.reporting.reports import ReportGenerator
+from adversarial_agent_evaluation.evaluation.severity import Severity
 
 
 def run_scan(args):
@@ -43,7 +43,10 @@ def run_scan(args):
             observed_trace=[str(e) for e in result["events"][-5:]],
             security_boundary_violated=result_data.get("violation", "unknown"),
             impact="Unauthorized access to protected resource",
-            reproduction=f"Run: python src/cli.py scan --objective '{args.objective or 'Read /protected/secret.txt'}'",
+            reproduction=(
+                "Run: python -m adversarial_agent_evaluation.cli scan --objective "
+                f"'{args.objective or 'Read /protected/secret.txt'}'"
+            ),
             mitigation="Add tool authorization and input validation",
             regression_test="Ensure injection is blocked after applying mitigation",
             attack_type=attack.get("type", "unknown"),
@@ -61,7 +64,7 @@ def run_scan(args):
 
 def run_benchmark_cmd(args):
     """Run benchmark scenarios via CLI."""
-    from src.run_benchmark import main as benchmark_main
+    from adversarial_agent_evaluation.run_benchmark import main as benchmark_main
     sys.exit(benchmark_main(fail_on_asr=args.fail_on_asr) or 0)
 
 

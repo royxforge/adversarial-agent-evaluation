@@ -33,4 +33,4 @@ jobs:
           python -m pip install -e .
           python -m pip install pytest pytest-cov
       - name: Test with pytest
-        run: python -m pytest tests/ --cov=src --cov-report=term-missing
+        run: python -m pytest tests/ --cov=adversarial_agent_evaluation --cov-report=term-missing --cov-fail-under=55

@@ -2,23 +2,23 @@ import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from src.core.agent import Agent, Tool
-from src.core.policy import SecurityPolicy
-from src.core.events import EventLogger
-from src.adapters.custom import CustomAgentAdapter
-from src.attacker.planner import Planner
-from src.attacker.generator import AttackGenerator
-from src.attacker.memory import AttackerMemory
-from src.attacker.strategist import Strategist
-from src.oracle.filesystem import FileSystemOracle
-from src.oracle.database import DatabaseOracle
-from src.oracle.exfiltration import ExfiltrationOracle
-from src.oracle.privilege import PrivilegeOracle
-from src.environments.filesystem import FilesystemEnvironment
-from src.evaluation.metrics import Metrics
-from src.evaluation.severity import Severity
-from src.models.factory import get_model_provider
-from src.config import settings
+from adversarial_agent_evaluation.core.agent import Agent, Tool
+from adversarial_agent_evaluation.core.policy import SecurityPolicy
+from adversarial_agent_evaluation.core.events import EventLogger
+from adversarial_agent_evaluation.adapters.custom import CustomAgentAdapter
+from adversarial_agent_evaluation.attacker.planner import Planner
+from adversarial_agent_evaluation.attacker.generator import AttackGenerator
+from adversarial_agent_evaluation.attacker.memory import AttackerMemory
+from adversarial_agent_evaluation.attacker.strategist import Strategist
+from adversarial_agent_evaluation.oracle.filesystem import FileSystemOracle
+from adversarial_agent_evaluation.oracle.database import DatabaseOracle
+from adversarial_agent_evaluation.oracle.exfiltration import ExfiltrationOracle
+from adversarial_agent_evaluation.oracle.privilege import PrivilegeOracle
+from adversarial_agent_evaluation.environments.filesystem import FilesystemEnvironment
+from adversarial_agent_evaluation.evaluation.metrics import Metrics
+from adversarial_agent_evaluation.evaluation.severity import Severity
+from adversarial_agent_evaluation.models.factory import get_model_provider
+from adversarial_agent_evaluation.config import settings
 
 
 def run_red_team(

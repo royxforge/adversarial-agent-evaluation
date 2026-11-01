@@ -11,4 +11,9 @@ build
 *.egg-info
 coverage
 htmlcov
-.kilo
+.kilo.coverage
+.coverage.*
+.coverage
+
+# Benchmark runs write reproducibility artefacts next to the package.
+src/experiments/
